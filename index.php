@@ -31,12 +31,12 @@
 		}
 		else 
 		{
-			$_SESSION['wiadomosc'] = "BŁĄD! Taki email juz istnieje";
+			$_SESSION['wiadomosc'] = "Błąd! Taki email juz istnieje";
 			session_destroy();
 		}
 	}
 	
-	//Sprawdzam czy przyszły dane do logowania
+	//Sprawdzam czy przyszĹ‚y dane do logowania
 	elseif(isset($_POST['email']) && isset($_POST['haslo'])) 
 	{
 		$pwd = $baza->query("SELECT * FROM users WHERE email LIKE '".$_POST['email']."' AND haslo LIKE SHA('".$_POST['haslo']."')")->fetch_assoc();
@@ -90,7 +90,7 @@
 	}else 
 	{
 		echo $_SESSION['wiadomosc']."<br><br>";
-		echo "Leki ze zbliżającym się końcem daty ważności:<br><br>";
+		echo "Leki ze zbliżającym się końcem daty ważnosci:<br><br>";
 		
 		$usun = ($_GET['usun']);
 		//Jesli byla prosba o usuniecie leku z apteczki
@@ -100,7 +100,7 @@
 			echo "Usunięto lek z bazy";
 		}
 	
-		//Leki których koniec daty ważności jest za mniej niż 1 miesiąc
+		//Leki ktĂłrych koniec daty waĹĽnoĹ›ci jest za mniej niĹĽ 1 miesiÄ…c
 		$wynik = $baza->query("SELECT * FROM Ap_We_Wy WHERE DATE(data_waznosci)<DATE_ADD(CURDATE(), INTERVAL 1 MONTH) ORDER BY data_waznosci ASC");
 		
 		while ($wynik!=null && $row = $wynik->fetch_assoc()) {
@@ -112,7 +112,7 @@
 			echo  $row_leki["op_zb"] . ", "; 
 			echo  "<b>Pozostało:</b> ". $row["pozostalo"] . ", "; 
 			echo  "<b>Cena:</b> ". $row["wartosc"] . ", ";
-			echo  "<b><u>Data ważności: ". $row["data_waznosci"] . ", </u></b>";
+			echo  "<b><u>Data ważnoscici: ". $row["data_waznosci"] . ", </u></b>";
 			echo  "<b>Dodane dnia:</b> ". $row["data"] . ", ";
 			echo  "<b>Przez:</b> ". $row_users["imie"] . " ";
 			echo  $row_users["nazwisko"];

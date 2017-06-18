@@ -7,7 +7,7 @@
 //Dostęp do bazy
 	$dbServer = 'mysql.agh.edu.pl';
 	$dbLogin = 'klaudgg';
-	$dbHaslo = 'brAtWbqRPYKbF5wn';
+	$dbHaslo = 'mPcSRXL8PzzQJRrd';
 	$dbBaza = 'klaudgg';
 	
 ?>
