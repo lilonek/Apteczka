@@ -1,13 +1,32 @@
-<?php 
-	session_start();
+<?php
+error_reporting(E_ALL);
+session_save_path("/home/piegrp/klaudgg/public_html/SIwM");
+session_start();
+
+require_once 'classes/Apteczka.php';
+require_once 'classes/Lek.php';
+require_once 'classes/Uzytkownik.php';
+require_once 'classes/DB.php';
+require_once 'classes/ApteczkaDB.php';
+require_once 'classes/LekDB.php';
+require_once 'classes/UzytkownikDB.php';
+
+
+// phpinfo();
+
+
+DB::connect('mysql.agh.edu.pl', 'klaudgg', 'mPcSRXL8PzzQJRrd','klaudgg');
+	
 	require_once 'conf/zmienne.php';
 	require_once "inc/$lang/teksty.php";
-	
+
 	if(!isset($_SESSION['zalogowany']))
 	header("Location: index.php?wybrano=0&zaloguj_sie=1");
 	
 	require_once 'inc/nagl.php';
-	require_once 'inc/baza.php';
+	//require_once 'inc/baza.php';
+	
+	
 ?>
 
 	<header>
@@ -22,80 +41,74 @@
 	
 	
 <?php 
-	//Polaczenie z baza danych
-	$idleki = ($_GET['idleki']);
-	$usun = ($_GET['usun']);
-	$conn = @mysql_connect ($dbServer, $dbLogin, $dbHaslo);
-	$select = @mysql_select_db  ($dbBaza, $conn);
 
-	if (!$conn) {
-		die ('<p class="error">Nie udało się połączyć z bazą danych.</p>');
-	}
-
-	if (!$select) {
-		die ('<p class="error">Nie udało się wybrać danych.</p>');
-	}	
-	
 	//Jesli cos przyszlo z wyszukiwarki, to dodaj to do bazy
-	if($idleki>0)
+	if(isset($_GET['idleki']))
 	{
-		$date = $_POST['date'];
+		$idleki = $_GET['idleki'];
+		
+		$dataPrzeterminowania = $_POST['date'];
 		$cena = $_POST['cena'];
-		$ilosc = $_POST['ilosc'];
-	
-		//Pobieranie informacji o uzytkowniku oraz leku który dodał
-		$wynik = $baza->query("SELECT * FROM leki_specyfikacja WHERE idleki LIKE ".$idleki);
-		$lek = $wynik->fetch_assoc();
-		$wynik = $baza->query("SELECT * FROM users WHERE email LIKE '".$_SESSION['user']."'");
-		$user = $wynik->fetch_assoc();
+		$iloscLeku = $_POST['ilosc'];
+		$lek = LekDB::getLekById($idleki);
+			
+		$apteczka = ApteczkaDB::getApteczkaById($_SESSION['apteczka']);
+		$uzytkownik = UzytkownikDB::uzytkownikByID($_SESSION['user_id']);
 		
-		echo "Uzytkownik <b>".$_SESSION['user']."</b> dodał do swojej apteczki lek <b>".$lek['nazwa']."</b>";
-		
-		//Dodanie rekordu do bazy Apteczka (Ap_We_Wy) - będą 2 scenariusze: istnieje już lek o takiej dacie i cenie; nie istnieje taki lek
-		$wynik = $baza->query("SELECT * FROM Ap_We_Wy WHERE DATE(data_waznosci)='".$date."' AND wartosc='".$cena."' AND id_spec='".$idleki."'")->fetch_assoc();
-		
-		if($wynik != null) //jest juz taki lek
-			$baza->query("UPDATE Ap_We_Wy SET pozostalo='".($wynik['pozostalo']+$ilosc)."' WHERE id_Ap_We_Wy='".$wynik['id_Ap_We_Wy']."'");
-		
-		else //nie ma jeszcze takiego leku, o tej cenie i tej dacie ważności
-			$baza->query("INSERT INTO Ap_We_Wy (id_konta, id_spec, data, id_operacja, ilosc, wartosc, pozostalo, data_waznosci, dok_zrodlowy) VALUES 
-			('".$user['idkonta']."', '".$lek['idleki']."', '".date("Y-m-d")."', '"."1"."', '".$ilosc."', '".$cena."', '".$ilosc."', '".$date."', '0')");
+		ApteczkaDB::dodajLek($apteczka, $lek, $iloscLeku, $cena, $dataPrzeterminowania, $uzytkownik);
+		echo '<p>'.$uzytkownik->imie().' dodał/-a '.$lek->nazwaLeku().'</p>';
 	}
 	
 	//Jesli byla prosba o usuniecie leku z apteczki
-	elseif($usun>0)
+	elseif(isset($_GET['usun']))
 	{
-		$baza->query("DELETE FROM Ap_We_Wy WHERE id_Ap_We_Wy='".$usun."'");
-		echo "Usunięto lek z bazy";
+		ApteczkaDB::usunLek($_GET['usun']);
 	}
-		
-	//Wyswietlanie Apteczki
-	//Przygotowywanie zapytania
-	$query = "SELECT * FROM Ap_We_Wy ORDER BY data_waznosci ASC";	// lista lekow (z rosnącą datą ważności)
 	
-	//echo $query;
-	//Wykonanie zapytania i pobieranie wyników
-	$wynik = $baza->query($query);
-	echo "<hr>";
+	
+	if(isset($_GET['wezlek'])){
+		$idwpis = $_GET['wezlek'];
+		$ilosc = $_POST['wezilosc'];
+		if(!ApteczkaDB::wezLek($idwpis, $ilosc)){
+			echo '<p>Masz za malo leku!</p>';
+		}else {
+			echo '<p>Zabrano '.$ilosc.' sztuk leku z apteczki</p>';
+		}
+	}
+
+	echo "<hr><table><tr>
+		<th>Nazwa</th>
+		<th>Ilosc</th>
+		<th>Data przeterminowania</th>
+		<th>Data dodania</th>
+		<th>Uzytkownik</th>
+<th>Menu</th>
+		</tr>";
 	
 	//Wyświetlenie wyniku zapytania
-	while ($wynik!=null && $row = $wynik->fetch_assoc()) {
-		$row_leki = $baza->query("SELECT * FROM leki_specyfikacja WHERE idleki LIKE ".$row["id_spec"])->fetch_assoc();
-		$row_users = $baza->query("SELECT * FROM users WHERE idkonta LIKE ".$row["id_konta"])->fetch_assoc();		
-			
-		//echo  $row["id_Ap_We_Wy"] . ". "; 
-		echo  $row_leki["nazwa"] . ", "; 
-		echo  $row_leki["op_zb"] . ", "; 
-		echo  "<b>Pozostało:</b> ". $row["pozostalo"] . ", "; 
-		echo  "<b>Cena:</b> ". $row["wartosc"] . ", ";
-		echo  "<b>Data ważności:</b> ". $row["data_waznosci"] . ", ";
-		echo  "<b>Dodane dnia:</b> ". $row["data"] . ", ";
-		echo  "<b>Przez:</b> ". $row_users["imie"] . " ";
-		echo  $row_users["nazwisko"];
-		?><form action="apteczka.php?usun=<?php echo $row["id_Ap_We_Wy"];?>" id="usun" method="post"> 
-			<input type="submit" value="Usuń z apteczki" /></form><?php
-		echo "<br>";	 
-	}
+
+	$leki = ApteczkaDB::pobierzLeki($_SESSION['apteczka']);
+	foreach ($leki as $lek):
+	?>
+		<tr>
+			<td><?php echo $lek['nazwa'] ?></td>
+			<td><?php echo $lek['ilosc'] ?></td>
+			<td><?php echo $lek['data_przeterminowania'] ?></td>
+			<td><?php echo $lek['data_dodania'] ?></td>
+			<td><?php echo $lek['imie'].' '.$lek['nazwisko'] ?></td>
+			<td>
+			<form action="apteczka.php?wezlek=<?php echo $lek["id"];?>" id="wezilosc" method="post"> 
+		Ilosc: <input type="number" name="wezilosc" min="1" style = "width: 100px" required>
+			<input name = "wezlek" type="submit" value="Weź lek z apteczki" /></form>
+		<form action="apteczka.php?usun=<?php echo $lek["id"]; ?>" id="usun" method="post"> 
+			<input type="submit" value="Usuń z apteczki" /></form>
+			</td>
+		</tr>
+		
+		
+	<?
+	endforeach;		
+	echo "</table>";	 
 	
 ?>
 </div>

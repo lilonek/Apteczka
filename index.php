@@ -1,16 +1,24 @@
 <?php 
 
-	session_start();
+session_save_path("/home/piegrp/klaudgg/public_html/SIwM");
+session_start();
+	
 	require_once 'conf/zmienne.php';
 	//require_once "inc/$lang/error_msg.php";
 	require_once "inc/$lang/teksty.php";
-	require_once 'inc/baza.php';		
+	require_once 'inc/baza.php';
+	
+	
 	require_once 'inc/nagl.php';
+	require_once 'classes/Apteczka.php';
+	require_once 'classes/DB.php';
+	require_once 'classes/ApteczkaDB.php';
 	
-	$conn = @mysql_connect ($dbServer, $dbLogin, $dbHaslo);
-	$select = @mysql_select_db  ($dbBaza, $conn);
+	DB::connect('mysql.agh.edu.pl', 'klaudgg', 'mPcSRXL8PzzQJRrd','klaudgg');
 	
-	
+// 	$conn = @mysql_connect ($dbServer, $dbLogin, $dbHaslo);
+// 	$select = @mysql_select_db  ($dbBaza, $conn);
+
 	//Sprawdzam czy przyszlo rzadanie wylogowania
 	if($_GET['wyloguj'] == 1){
 		session_destroy();
@@ -40,11 +48,14 @@
 	elseif(isset($_POST['email']) && isset($_POST['haslo'])) 
 	{
 		$pwd = $baza->query("SELECT * FROM users WHERE email LIKE '".$_POST['email']."' AND haslo LIKE SHA('".$_POST['haslo']."')")->fetch_assoc();
+		
 		if($pwd!=null)
 		{
 			$_SESSION['wiadomosc'] = "Zalogowano: ".$_POST['email'];
 			$_SESSION['user'] = $_POST['email'];
+			$_SESSION['user_id'] = $pwd['idkonta'];
 			$_SESSION['zalogowany'] = true;
+			$_SESSION['apteczka'] = $_POST['apteczka_id'];
 		}
 		else $byl_blad_logowania = 2;
 	}
@@ -81,8 +92,14 @@
 			<legend><?php echo $lgLogowanie?></legend>
 			<?php echo $lbEmail?><input type="email" name="email" placeholder="<?php echo $logEmailpch?>" required><br>
 			<?php echo $lbHaslo?><input type="password" name="haslo" placeholder="<?php echo $logHaslopch?>" required><br>
+			<select name="apteczka_id">
+				<?php foreach(ApteczkaDB::wszystkieApteczki() as $a): ?>
+					<option value="<?php echo $a->id(); ?>"><?php echo $a->nazwa(); ?></option>
+				<?php endforeach;?>
+			</select>
 			<input type="submit">
 			<a href="rejestracja.php">Rejestracja</a>
+			<a href="nowaapteczka.php">Dodaj nowa apteczke</a>
 		</fieldset>		
 	</form>
 <?php 
@@ -92,32 +109,28 @@
 		echo $_SESSION['wiadomosc']."<br><br>";
 		echo "Leki ze zbliżającym się końcem daty ważnosci:<br><br>";
 		
-		$usun = ($_GET['usun']);
 		//Jesli byla prosba o usuniecie leku z apteczki
-		if($usun>0)
+		if(isset($_GET['usun']))
 		{
-			$baza->query("DELETE FROM Ap_We_Wy WHERE id_Ap_We_Wy='".$usun."'");
+			ApteczkaDB::usunLek($_GET['usun']);
 			echo "Usunięto lek z bazy";
 		}
 	
 		//Leki ktĂłrych koniec daty waĹĽnoĹ›ci jest za mniej niĹĽ 1 miesiÄ…c
 		$wynik = $baza->query("SELECT * FROM Ap_We_Wy WHERE DATE(data_waznosci)<DATE_ADD(CURDATE(), INTERVAL 1 MONTH) ORDER BY data_waznosci ASC");
 		
-		while ($wynik!=null && $row = $wynik->fetch_assoc()) {
-			$row_leki = $baza->query("SELECT * FROM leki_specyfikacja WHERE idleki LIKE ".$row["id_spec"])->fetch_assoc();
-			$row_users = $baza->query("SELECT * FROM users WHERE idkonta LIKE ".$row["id_konta"])->fetch_assoc();
-			
+		$leki = ApteczkaDB::lekiBliskTermin($_SESSION['apteczka']);
+		foreach ($leki as $row) {	
 			//echo  $row["id_Ap_We_Wy"] . ". "; 
-			echo  $row_leki["nazwa"] . ", "; 
-			echo  $row_leki["op_zb"] . ", "; 
-			echo  "<b>Pozostało:</b> ". $row["pozostalo"] . ", "; 
-			echo  "<b>Cena:</b> ". $row["wartosc"] . ", ";
-			echo  "<b><u>Data ważnoscici: ". $row["data_waznosci"] . ", </u></b>";
-			echo  "<b>Dodane dnia:</b> ". $row["data"] . ", ";
-			echo  "<b>Przez:</b> ". $row_users["imie"] . " ";
-			echo  $row_users["nazwisko"];
+			echo  $row["nazwa"] . ", "; 
+			echo  $row["op_zb"] . ", "; 
+			echo  "<b>Pozostało:</b> ". $row["ilosc"] . ", "; 
+// 			echo  "<b>Cena:</b> ". $row["wartosc"] . ", ";
+			echo  "<b><u>Data ważnosci: </u></b> ". $row["data_przeterminowania"] . ",";
+			echo  "<b>Dodane dnia:</b> ". $row["data_dodania"] . ", ";
+			echo  "<b>Przez:</b> ". $row['imie'] ." ".$row['nazwisko'];
 			echo "<br>";
-			?><form action="index.php?usun=<?php echo $row["id_Ap_We_Wy"];?>" id="usun" method="post"> 
+			?><form action="index.php?usun=<?php echo $row["id"];?>" id="usun" method="post"> 
 			<input type="submit" value="Usuń z apteczki" /></form><?php
 			
 			echo "<br>";

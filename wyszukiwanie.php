@@ -1,14 +1,32 @@
 <?php 
-	session_start();
+error_reporting(E_ALL);
+session_save_path("/home/piegrp/klaudgg/public_html/SIwM");
+session_start();
+
+	require_once 'classes/Apteczka.php';
+	require_once 'classes/Lek.php';
+	require_once 'classes/Uzytkownik.php';
+	require_once 'classes/DB.php';
+	require_once 'classes/ApteczkaDB.php';
+	require_once 'classes/LekDB.php';
+	require_once 'classes/UzytkownikDB.php';
+	
+	
+	// phpinfo();
+	
+	
+	DB::connect('mysql.agh.edu.pl', 'klaudgg', 'mPcSRXL8PzzQJRrd','klaudgg');
+	
 	require_once 'conf/zmienne.php';
 	require_once "inc/$lang/teksty.php";
 	
 	if(!isset($_SESSION['zalogowany']))
-	header("Location: index.php?wybrano=0&zaloguj_sie=1");
-	
-	require_once 'inc/nagl.php';
-	require_once 'inc/baza.php';
+		header("Location: index.php?wybrano=0&zaloguj_sie=1");
+		
+		require_once 'inc/nagl.php';
+		//require_once 'inc/baza.php';
 ?>
+
 
 	<header>
 		<H1><?php echo $tytul?></H1>
@@ -34,16 +52,16 @@
 	$Nazwa = $_POST['Nazwa'];
 			
 	//Polaczenie z baza danych
-	$conn = @mysql_connect ($dbServer, $dbLogin, $dbHaslo);
-	$select = @mysql_select_db  ($dbBaza, $conn);
+// 	$conn = @mysql_connect ($dbServer, $dbLogin, $dbHaslo);
+// 	$select = @mysql_select_db  ($dbBaza, $conn);
 
-	if (!$conn) {
-		die ('<p class="error">Nie udało się połączyć z bazą danych.</p>');
-	}
+// 	if (!$conn) {
+// 		die ('<p class="error">Nie udało się połączyć z bazą danych.</p>');
+// 	}
 
-	if (!$select) {
-		die ('<p class="error">Nie udało się wybrać bazy danych.</p>');
-	}	
+// 	if (!$select) {
+// 		die ('<p class="error">Nie udało się wybrać bazy danych.</p>');
+// 	}	
 
 	//Przygotowywanie zapytania
 	if (empty($_POST['sort']) && empty($_POST['Nazwa'])) {
@@ -58,7 +76,6 @@
 	echo "<hr>";
 	
 	//Wyświetlenie wyniku zapytania
-		//while ($row = $wynik->fetch_assoc()) {
 	while ($wynik!=null && $row = $wynik->fetch_assoc()) {
 			echo  $row["idleki"] . ". "; 
 			echo  $row["nazwa"] . ", ";
