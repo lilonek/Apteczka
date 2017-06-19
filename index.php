@@ -1,23 +1,6 @@
 <?php 
 
-session_save_path("/home/piegrp/klaudgg/public_html/SIwM");
-session_start();
-	
-	require_once 'conf/zmienne.php';
-	//require_once "inc/$lang/error_msg.php";
-	require_once "inc/$lang/teksty.php";
-	require_once 'inc/baza.php';
-	
-	
-	require_once 'inc/nagl.php';
-	require_once 'classes/Apteczka.php';
-	require_once 'classes/DB.php';
-	require_once 'classes/ApteczkaDB.php';
-	
-	DB::connect('mysql.agh.edu.pl', 'klaudgg', 'mPcSRXL8PzzQJRrd','klaudgg');
-	
-// 	$conn = @mysql_connect ($dbServer, $dbLogin, $dbHaslo);
-// 	$select = @mysql_select_db  ($dbBaza, $conn);
+include_once 'inc/required.php';
 
 	//Sprawdzam czy przyszlo rzadanie wylogowania
 	if($_GET['wyloguj'] == 1){
@@ -117,7 +100,7 @@ session_start();
 		}
 	
 		//Leki ktĂłrych koniec daty waĹĽnoĹ›ci jest za mniej niĹĽ 1 miesiÄ…c
-		$wynik = $baza->query("SELECT * FROM Ap_We_Wy WHERE DATE(data_waznosci)<DATE_ADD(CURDATE(), INTERVAL 1 MONTH) ORDER BY data_waznosci ASC");
+// 		$wynik = $baza->query("SELECT * FROM Ap_We_Wy WHERE DATE(data_waznosci)<DATE_ADD(CURDATE(), INTERVAL 1 MONTH) ORDER BY data_waznosci ASC");
 		
 		$leki = ApteczkaDB::lekiBliskTermin($_SESSION['apteczka']);
 		foreach ($leki as $row) {	
