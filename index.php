@@ -1,9 +1,9 @@
 <?php 
 
-include_once 'inc/required.php';
+include 'inc/required.php';
 
 	//Sprawdzam czy przyszlo rzadanie wylogowania
-	if($_GET['wyloguj'] == 1){
+	if ($_GET['wyloguj'] == 1){
 		session_destroy();
 		header('Refresh: 1; url=index.php');
 	}	

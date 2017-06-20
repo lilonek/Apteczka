@@ -1,30 +1,12 @@
 <?php
-error_reporting(E_ALL);
-session_save_path("/home/piegrp/klaudgg/public_html/SIwM");
-session_start();
 
-require_once 'classes/Apteczka.php';
-require_once 'classes/Lek.php';
-require_once 'classes/Uzytkownik.php';
-require_once 'classes/DB.php';
-require_once 'classes/ApteczkaDB.php';
-require_once 'classes/LekDB.php';
-require_once 'classes/UzytkownikDB.php';
-
-
-// phpinfo();
-
-
-DB::connect('mysql.agh.edu.pl', 'klaudgg', 'mPcSRXL8PzzQJRrd','klaudgg');
-	
-	require_once 'conf/zmienne.php';
-	require_once "inc/$lang/teksty.php";
+include_once 'inc/required.php';
 
 	if(!isset($_SESSION['zalogowany']))
 	header("Location: index.php?wybrano=0&zaloguj_sie=1");
 	
 	require_once 'inc/nagl.php';
-	//require_once 'inc/baza.php';
+	require_once 'inc/baza.php';
 	
 	
 ?>

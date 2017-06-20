@@ -1,13 +1,10 @@
 <?php
-	session_start();
-	require_once 'conf/zmienne.php';
-	require_once "inc/$lang/teksty.php";
+
+include_once 'inc/required.php';
 
 	if(!isset($_SESSION['zalogowany']))
 		header("Location: index.php?wybrano=0&zaloguj_sie=1");
 
-	require_once 'inc/baza.php';
-	require_once 'inc/nagl.php';
 ?>
 	<header>
 		<H1><?php echo $tytul?></H1>

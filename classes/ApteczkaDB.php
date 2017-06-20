@@ -72,9 +72,12 @@ class ApteczkaDB
 	
 	public static function wyszukajLek($sort, $Nazwa){
 		
-		$query = "SELECT * FROM leki_specyfikacja WHERE ".$sort." LIKE '".$Nazwa."%'";
-		return DB::getConnection()->query($query)->fetchAll() ;
+		$query = "SELECT * FROM leki_specyfikacja WHERE ".$sort." LIKE '".$Nazwa."'";
+		
+		return DB::getConnection()->query($query)->fetchAll();
+		
 	}
+	
 	
 	public static function usunLek($idwpis) {
 		$query = "DELETE FROM leki_apteczka WHERE id=$idwpis";
