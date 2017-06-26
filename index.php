@@ -82,7 +82,6 @@ include 'inc/required.php';
 			</select>
 			<input type="submit">
 			<a href="rejestracja.php">Rejestracja</a>
-			<a href="nowaapteczka.php">Dodaj nowa apteczke</a>
 		</fieldset>		
 	</form>
 <?php 
@@ -103,20 +102,22 @@ include 'inc/required.php';
 // 		$wynik = $baza->query("SELECT * FROM Ap_We_Wy WHERE DATE(data_waznosci)<DATE_ADD(CURDATE(), INTERVAL 1 MONTH) ORDER BY data_waznosci ASC");
 		
 		$leki = ApteczkaDB::lekiBliskTermin($_SESSION['apteczka']);
-		foreach ($leki as $row) {	
-			//echo  $row["id_Ap_We_Wy"] . ". "; 
-			echo  $row["nazwa"] . ", "; 
-			echo  $row["op_zb"] . ", "; 
-			echo  "<b>Pozostało:</b> ". $row["ilosc"] . ", "; 
-// 			echo  "<b>Cena:</b> ". $row["wartosc"] . ", ";
-			echo  "<b><u>Data ważnosci: </u></b> ". $row["data_przeterminowania"] . ",";
-			echo  "<b>Dodane dnia:</b> ". $row["data_dodania"] . ", ";
-			echo  "<b>Przez:</b> ". $row['imie'] ." ".$row['nazwisko'];
-			echo "<br>";
-			?><form action="index.php?usun=<?php echo $row["id"];?>" id="usun" method="post"> 
-			<input type="submit" value="Usuń z apteczki" /></form><?php
-			
-			echo "<br>";
+		if(isset($leki)){
+			foreach ($leki as $row) {	
+				//echo  $row["id_Ap_We_Wy"] . ". "; 
+				echo  $row["nazwa"] . ", "; 
+				echo  $row["op_zb"] . ", "; 
+				echo  "<b>Pozostało:</b> ". $row["ilosc"] . ", "; 
+	// 			echo  "<b>Cena:</b> ". $row["wartosc"] . ", ";
+				echo  "<b><u>Data ważnosci: </u></b> ". $row["data_przeterminowania"] . ",";
+				echo  "<b>Dodane dnia:</b> ". $row["data_dodania"] . ", ";
+				echo  "<b>Przez:</b> ". $row['imie'] ." ".$row['nazwisko'];
+				echo "<br>";
+				?><form action="index.php?usun=<?php echo $row["id"];?>" id="usun" method="post"> 
+				<input type="submit" value="Usuń z apteczki" /></form><?php
+				
+				echo "<br>";
+			}
 		}
 	}
 ?>

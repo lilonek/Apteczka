@@ -1,5 +1,4 @@
 <!doctype html>
-<html>
 	<head>
 		<title><?php echo $aplikacja?></title>
 		<meta charset="UTF-8">

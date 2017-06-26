@@ -17,10 +17,12 @@ H5{	font-size: 8pt; color: gray;
   background-color: #FFE1BE;
   border-top-width: 0px;
   margin: auto;
-  height: 70%;
   width: 90%;
   padding: 10px;  
   }
+  
+  table {
+  max-height: 100px}
   
   header{
   border-style: solid;

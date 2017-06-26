@@ -15,6 +15,7 @@ class ApteczkaDB
 	
 	public static function getApteczkaById($id) {
 		$row = DB::getConnection()->query("SELECT * FROM apteczki WHERE id=$id");
+		var_dump($id);
 		$row = $row->fetch();
 		return new Apteczka($row['id'], $row['nazwa']);
 	}
@@ -74,6 +75,7 @@ class ApteczkaDB
 		
 		$query = "SELECT * FROM leki_specyfikacja WHERE ".$sort." LIKE '".$Nazwa."'";
 		
+		
 		return DB::getConnection()->query($query)->fetchAll();
 		
 	}
@@ -81,12 +83,15 @@ class ApteczkaDB
 	
 	public static function usunLek($idwpis) {
 		$query = "DELETE FROM leki_apteczka WHERE id=$idwpis";
-// 		try {
-// 			DB::getConnection()->beginTransaction();
-// 			$q = DB::getConnection()->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY));
+		try {
+			DB::getConnection()->beginTransaction();
+			$q = DB::getConnection()->prepare($query);
+			$result = $q->execute();
 			
-// 		}
-		return DB::getConnection()->query($query);
+			DB::getConnection()->commit();
+		}catch (Exception $e) {
+			DB::getConnection()->rollBack();
+		}
 	}
 	
 	public static function lekiBliskTermin($apteczkaID) {
@@ -94,13 +99,39 @@ class ApteczkaDB
 				LEFT JOIN leki_specyfikacja ON leki_apteczka.id_lek = leki_specyfikacja.idleki 
 				LEFT JOIN users ON leki_apteczka.id_uzytkownik = users.idkonta 
 				WHERE id_apteczka = $apteczkaID AND DATE(data_przeterminowania) < DATE_ADD(CURDATE(), INTERVAL 1 MONTH) ORDER BY data_przeterminowania ASC";
-// 		if (!isset()
+
 		return DB::getConnection()->query($sql)->fetchAll();
 	}
 	
 	
 	public static function dodajApteczke($nazwa) {
-		return DB::getConnection()->query("INSERT INTO apteczki VALUE(null, '$nazwa')");
+		
+		$query = "INSERT INTO apteczki VALUE(null, '$nazwa')";
+		try {
+			DB::getConnection()->beginTransaction();
+			$q = DB::getConnection()->prepare($query);
+			$result = $q->execute();
+			
+			DB::getConnection()->commit();
+		}catch (Exception $e) {
+			DB::getConnection()->rollBack();
+		}
+		
 	}
+	
+	public static function allUsersRaports($apteczkaId, $userId){
+		$sql = "SELECT raports.data_dodania, raports.ilosc, leki_specyfikacja.nazwa
+				FROM raports 
+				LEFT JOIN leki_specyfikacja ON leki_specyfikacja.idleki = raports.lek_id
+				WHERE user_id = $userId AND apteczka_id = $apteczkaId";
+		return DB::getConnection()->query($sql)->fetchAll();
+	}
+	
+	public static function addRaport($apteczkaId, $lekId, $ilosc, $userId) {
+		$sql = "INSERT INTO raports VALUES(null, $apteczkaId, $lekId, $ilosc, $userId, NOW())";
+		return DB::getConnection()->query($sql);
+	}
+	
+
 }
 ?>

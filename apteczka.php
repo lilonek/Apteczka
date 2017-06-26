@@ -47,6 +47,8 @@ include_once 'inc/required.php';
 		ApteczkaDB::usunLek($_GET['usun']);
 	}
 	
+	$id_user = $_SESSION['user_id'];
+	$id_apt = $_SESSION['apteczka'];
 	
 	if(isset($_GET['wezlek'])){
 		$idwpis = $_GET['wezlek'];
@@ -54,6 +56,9 @@ include_once 'inc/required.php';
 		if(!ApteczkaDB::wezLek($idwpis, $ilosc)){
 			echo '<p>Masz za malo leku!</p>';
 		}else {
+			// aktualizacja raportów
+			echo $idwpis;
+			ApteczkaDB::addRaport($_SESSION['apteczka'], $_GET['wezlek'], $_POST['wezilosc'], $_SESSION['user_id']);
 			echo '<p>Zabrano '.$ilosc.' sztuk leku z apteczki</p>';
 		}
 	}

@@ -20,7 +20,9 @@
 	$menuBazy = "Z bazy";
 	$menuDok  = "Dokumentacja";
 	$menuWysz = "Wyszukiwarka";
+	$menuRaport = "Raport o użytkownikach";
 	$menuWyloguj = "Wyloguj się";
+	$menuApteczka  = "Dodaj apteczkę";
 	
 //Wybrana opcja
 	$wybrane[0] = "Logowanie";

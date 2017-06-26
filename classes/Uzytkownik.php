@@ -7,13 +7,15 @@ class Uzytkownik
 	private $imie;
 	private $nazwisko;
 	private $haslo;
+	private $admin;
 	
-	public function __construct($id, $email, $imie, $nazwisko, $haslo) {
+	public function __construct($id, $email, $imie, $nazwisko, $haslo, $admin) {
 		$this->id = $id;
 		$this->email = $email;
 		$this->imie = $imie;
 		$this->nazwisko = $nazwisko;
 		$this->haslo = $haslo;
+		$this->admin = $admin;
 	}
 	
 	public function imie(){
@@ -34,6 +36,10 @@ class Uzytkownik
 	
 	public function id(){
 		return $this->id;
+	}
+	
+	public function admin(){
+		return $this->admin;
 	}
 }
 

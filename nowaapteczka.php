@@ -19,7 +19,9 @@ include_once 'inc/required.php';
 
 <?php
 
-if(isset($_GET['dodawanie'])) {
+$uzytkownik = UzytkownikDB::uzytkownikByID($_SESSION['user_id']);
+
+if((isset($_GET['dodawanie'])) && ($uzytkownik->admin())== 1) {
 	if($_POST['haslo'] != 'jelonek') {
 		echo '<p>Zle haslo mlotku</p>';
 	}else {

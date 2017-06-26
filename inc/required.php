@@ -1,5 +1,5 @@
 <?php 
-// error_reporting(E_ALL);
+error_reporting(E_ALL);
 session_save_path("/home/piegrp/klaudgg/public_html/SIwM");
 session_start();
 	
